@@ -2,17 +2,17 @@ import React, { useState } from 'react'
 import { Button, Col, Row, Image } from 'antd'
 // import dayjs from 'dayjs'
 
-export default function ExpandedData() {
+export default function ExpandedData(row) {
 
     const [visible, setVisible] = useState(false)
 
     let table = [
-        { heading: "Title", data: "Today" },
-        { heading: "Location", data: "Faislabad" },
-        { heading: "Description", data: "This is Description" },
+        { heading:"Title", data: row.data.title },
+        { heading: "Location", data: row.data.location },
+        { heading: "Description", data: row.data.description },
         { heading: "Photo", data: <Button type='link' className='p-0' onClick={() => { setVisible(true) }}>Click to See</Button> },
     ]
-
+    
     return (
         <>
             <Row>
@@ -32,7 +32,7 @@ export default function ExpandedData() {
                 </Col>
             </Row>
 
-            <Image preview={{ visible, src:"https://i.pinimg.com/originals/65/70/0a/65700a980202957502cf0ccf524a3897.jpg", onVisibleChange: (value) => { setVisible(value) } }} />
+            <Image preview={{ visible, src:row.data.photo?.url, onVisibleChange: (value) => { setVisible(value) } }} />
         </>
     )
 }

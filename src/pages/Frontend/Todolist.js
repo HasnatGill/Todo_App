@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
-import { Typography, Button, Table, Input, Space } from 'antd'
+import React, { useEffect, useState } from 'react'
+import { Typography, Button, Table, Input, Space, Popconfirm } from 'antd'
 import ExpandedData from './ExpandedData';
+import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore/lite';
+import { firestore } from '../../config/firebase';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -8,12 +10,38 @@ const { Search } = Input;
 export default function Todolist() {
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [document, setDocument] = useState([]);
   const [loading, setLoading] = useState(false);
+
+
+  const getTodos = async () => {
+    let array = []
+    try {
+      setLoading(true)
+      const querySnapshot = await getDocs(collection(firestore, "Todos"));
+      querySnapshot.forEach((doc) => {
+        let data = doc.data()
+        data.key = data.id
+        array.push(data)
+      });
+      setDocument(array)
+      setLoading(false)
+    } catch (error) {
+      console.log('error :>> ', error);
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    getTodos()
+  }, [])
+
+
 
   const columns = [
     {
       title: 'Image',
-      render: (item, row) => <img src='https://i.pinimg.com/originals/65/70/0a/65700a980202957502cf0ccf524a3897.jpg' alt="Avter" style={{ width: 55, height: 55 }} className="border-0 rounded-5" />,
+      render: (row) => <img src={row.photo?.url} alt="Avter" style={{ width: 55, height: 55 }} className="border-0 rounded-5" />,
     },
     {
       title: 'Title',
@@ -29,36 +57,29 @@ export default function Todolist() {
     },
   ];
 
-  const data = [];
-  for (let i = 0; i < 2; i++) {
-    data.push({
-      key: i,
-      title: `Title`,
-      location: "Location",
-      description: "This is discription This is discription This is discription",
-    });
-  }
 
   const handleEdit = () => {
-    setLoading(true);
-    // ajax request after empty completing
-    setTimeout(() => {
-      setSelectedRowKeys([]);
-      setLoading(false);
-    }, 1000);
+
   };
 
-  const handleDelete = () => {
-    setLoading(true);
-    // ajax request after empty completing
-    setTimeout(() => {
-      setSelectedRowKeys([]);
-      setLoading(false);
-    }, 1000);
+  const handleDelete = async () => {
+    let DeleteTodo = document.find((doc) => doc.id === selectedRowKeys[0])
+    setLoading(true)
+
+    try {
+      await deleteDoc(doc(firestore, "Todos", DeleteTodo.id));
+      let newDocument = document.filter((doc) => {
+        return doc.id !== DeleteTodo.id
+      })
+      setDocument(newDocument)
+      setSelectedRowKeys([])
+      setLoading(false)
+    } catch (error) {
+      console.log('error', error)
+    }
   };
 
   const onSelectChange = (newSelectedRowKeys) => {
-    // console.log('selectedRowKeys changed: ', newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
@@ -67,7 +88,9 @@ export default function Todolist() {
     onChange: onSelectChange,
   };
 
-  const hasSelected = selectedRowKeys.length > 0;
+  const hasdelete = selectedRowKeys.length === 1;
+  // const hasSelected = selectedRowKeys.length > 0;
+  const edit = selectedRowKeys.length === 1;
 
   return (
 
@@ -81,24 +104,26 @@ export default function Todolist() {
           </Space>
 
           <Space size='small'>
-            <span style={{ marginLeft: 8, }}>{hasSelected ? `Selected ${selectedRowKeys.length} items` : ''}</span>
-            <Button type="primary" onClick={handleEdit} loading={loading}>Edit</Button>
-            <Button type="primary" danger onClick={handleDelete} disabled={!hasSelected} loading={loading}>Delete</Button>
+            <Button type="primary" onClick={handleEdit} disabled={!edit} >Edit</Button>
+            <Popconfirm title="Confrim To Detele" okButtonProps={{style:{background:"red"}}} onConfirm={handleDelete} onCancel={() => setSelectedRowKeys([])} okText="Delete" cancelText="Cancel">
+              <Button type="primary" danger disabled={!hasdelete}>Delete</Button>
+            </Popconfirm>
           </Space>
 
         </div>
 
         <Table
-          dataSource={data}
+          dataSource={document}
           columns={columns}
           rowSelection={rowSelection}
+          loading={loading}
           bordered
           expandable={{
             expandedRowRender: (row) => <ExpandedData data={row} />,
             // rowExpandable: (row) => row.registrationNumber !== 1,
           }}
           scroll={{ x: 800 }}
-          pagination={{position:['bottomLeft']}}
+          pagination={{ position: ['bottomLeft'] }}
         />
 
       </div>
