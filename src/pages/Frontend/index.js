@@ -10,17 +10,17 @@ import { auth } from '../../config/firebase';
 const { Content, Footer, Sider } = Layout;
 const { Title } = Typography;
 
-export default function Index() {
+export default function Frontend() {
+
+    const { dispatch} = useContext(AuthContext)
 
     let navigate = useNavigate()
-
-    const { dispatch } = useContext(AuthContext)
-
+   
     const handleLogout = () => {
         signOut(auth)
             .then(() => {
                 dispatch({ type: "LOGOUT" })
-                navigate("login")
+                navigate('auth/login')
             })
             .catch((e) => {
                 console.log('e', e)
@@ -37,7 +37,7 @@ export default function Index() {
         <Layout>
             <Sider breakpoint="lg" collapsedWidth={"0"} >
                 <Title level={2} className="text-white fs-4 p-3">Hasnat Majid</Title>
-                <Menu theme="dark" mode="inline" className='py-5 py-lg-0' defaultSelectedKeys={['1']} items={menu} />
+                <Menu theme="dark" mode="inline" className='py-5 py-lg-0' items={menu} />
             </Sider>
             <Layout>
 

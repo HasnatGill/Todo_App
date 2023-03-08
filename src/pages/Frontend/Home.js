@@ -6,6 +6,7 @@ import { InboxOutlined } from '@ant-design/icons';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore/lite';
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { firestore, storage } from '../../config/firebase';
+import { AuthContext } from '../../context/AuthContext';
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -14,7 +15,7 @@ const initialState = { title: "", location: "", description: "" }
 
 export default function Home() {
 
-    // const { user } = useContext(AuthContext)
+    const { user } = useContext(AuthContext)
 
     const [state, setState] = useState(initialState)
     const [file, setFile] = useState(null)
@@ -45,11 +46,12 @@ export default function Home() {
         if (!file.name) {
             return window.toastify('Upload', "error");
         }
-        let formData = {
-            title, location, description,
-            id: window.getRandomId(),
-            status: "active",
-            dateCreated: serverTimestamp(),
+        let formData = { title, location, description, }
+        formData.createdDate = serverTimestamp()
+        formData.id = window.getRandomId()
+        formData.createdBy = {
+            email: user.email,
+            uid: user.uid
         }
 
         setIsLoading(true)
@@ -90,7 +92,7 @@ export default function Home() {
 
     const createDoc = async (formData) => {
         try {
-            await setDoc(doc(firestore, "Todos", formData.id), formData)
+            await setDoc(doc(firestore, "todos", formData.id), formData)
             setFile(null)
             setIsLoading(false)
             setState(initialState)

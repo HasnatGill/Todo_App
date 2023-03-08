@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { GoogleCircleFilled, FacebookFilled } from '@ant-design/icons';
 import { Button, Checkbox, Col, Form, Input, Radio, Row, Space, Typography } from "antd";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, GoogleAuthProvider } from "firebase/auth";
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore/lite';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore/lite';
 import { auth, firestore } from '../../config/firebase';
 import { AuthContext } from '../../context/AuthContext';
 
@@ -38,6 +38,8 @@ export default function LoginAndRegister() {
         setState(s => ({ ...s, [name]: value }))
     }
 
+    // Login Fucnttion
+
     const handleLogin = () => {
 
         let { email, password } = state;
@@ -48,11 +50,11 @@ export default function LoginAndRegister() {
         setIsProcessing(true)
 
         signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
+            .then(async (userCredential) => {
                 // Signed in 
                 let user = userCredential.user;
-                console.log(user)
-                navigate("/")
+                readUserData(user)
+                // navigate("/")
                 // ...
             })
             .catch((error) => {
@@ -61,11 +63,34 @@ export default function LoginAndRegister() {
                 } else {
                     window.toastify("Something went wrong. Please try again or contact support team.", "error")
                 }
-            })
-            .finally(() => {
                 setIsProcessing(false)
             })
+
+
     }
+
+    const readUserData = async (authUser) => {
+
+        const docRef = doc(firestore, "users", authUser.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            let user = docSnap.data()
+            const isCustomer = user.roles.includes("customer")
+            dispatch({ type: "LOGIN", payload: { user, isCustomer } })
+            setIsProcessing(false)
+            window.toastify("Login successful", "success")
+            navigate('/')
+
+        } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+        }
+        setIsProcessing(false)
+    }
+
+
+    // Register Function 
 
     const handleRegister = () => {
 
@@ -85,7 +110,7 @@ export default function LoginAndRegister() {
                 let user = userCredential.user;
                 // console.log('user', user)
                 addDocument(user)
-                navigate('/')
+                // navigate('/')
                 // ...
             })
             .catch((error) => {
@@ -94,20 +119,16 @@ export default function LoginAndRegister() {
                 } else {
                     window.toastify("Something went wrong. Please try again or contact support team.", "error")
                 }
-            })
-            .finally(() => {
                 setIsProcessing(false)
             })
-
     }
 
-
     const addDocument = async (userCredential) => {
-        let { email, uid } = userCredential;
+        let { email, uid, displayName } = userCredential;
 
         let user = {
-            firstName: state.firstName,
-            lastName: state.lastName,
+            firstName: state.firstName || displayName,
+            lastName: state.lastName || displayName,
             email,
             uid,
             dateCreated: serverTimestamp(),
@@ -116,13 +137,19 @@ export default function LoginAndRegister() {
         }
 
         try {
-            await setDoc(doc(firestore, "user", user.uid), user);
-            dispatch({ type: "LOGIN", payload: { user } })
+            await setDoc(doc(firestore, "users", user.uid), user);
+            dispatch({ type: "LOGIN", payload: { user, isCustomer: true } })
+            setIsProcessing(false)
+            window.toastify("A new user has been successfully registered.", "success")
+            navigate('/')
         } catch (error) {
-            console.log('error', error)
+            setIsProcessing(false)
+            window.toastify("Something went wrong while creating user profile. Please try again or contact support team.", "error")
         }
     }
 
+
+    // Register with Google
     const registerGoogle = () => {
         const provider = new GoogleAuthProvider()
         signInWithPopup(auth, provider)
@@ -132,7 +159,7 @@ export default function LoginAndRegister() {
                 const token = credential.accessToken;
                 console.log('token', token)
                 const user = result.user;
-                console.log('user', user)
+                addDocument(user)
                 navigate("/")
             }).catch((error) => {
                 // Handle Errors here.
@@ -147,8 +174,9 @@ export default function LoginAndRegister() {
                 console.log('credential', credential)
                 // ...
             });
-
     }
+
+    // LOgin with Google
     const loginGoogle = () => {
         const provider = new GoogleAuthProvider()
 
@@ -157,19 +185,17 @@ export default function LoginAndRegister() {
                 // This gives you a Google Access Token. You can use it to access the Google API.
                 const credential = GoogleAuthProvider.credentialFromResult(result);
                 const token = credential.accessToken;
+                console.log('token', token)
                 // The signed-in user info.
                 const user = result.user;
+                console.log('user', user)
+                navigate("/")
                 // IdP data available using getAdditionalUserInfo(result)
                 // ...
             }).catch((error) => {
                 // Handle Errors here.
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                // The email of the user's account used.
-                const email = error.customData.email;
-                // The AuthCredential type that was used.
-                const credential = GoogleAuthProvider.credentialFromError(error);
-                // ...
+                console.log('error', error)
+
             });
     }
 

@@ -1,7 +1,6 @@
 import React from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import PrivateRoute from '../component/PrivateRoute'
-// import { AuthContext } from '../context/AuthContext'
 import Auth from './Auth'
 import Frontend from './Frontend'
 

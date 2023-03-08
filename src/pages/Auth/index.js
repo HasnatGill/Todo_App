@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import Login from './LoginAndResgister'
 import Register from './LoginAndResgister'
 
-export default function index() {
+export default function Index() {
     return (
         <>
             <Routes>
