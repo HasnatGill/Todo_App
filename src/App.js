@@ -12,12 +12,6 @@ ReactGA.initialize("G-WENWWJCX8W");
 
 function App() {
 
-
-  // ReactGA.event({
-  //   category: "APP",
-  //   action: "VIEW",
-  //   label: "APP PAGE",
-  // });
   const { isAppLoading } = useContext(AuthContext)
 
   if (isAppLoading)
