@@ -28,8 +28,8 @@ export default function Home() {
     const handleSubmit = () => {
 
         ReactGA.event({
-            category:'Submit',
-            action:"Add_Todo",
+            category: 'Submit',
+            action: "Add_Todo",
         })
 
         let { title, location, description } = state;
@@ -37,18 +37,11 @@ export default function Home() {
         location = location.trim()
         description = description.trim()
 
-        if (title.length < 3) {
-            return window.toastify('Enter the Title and title word should be 5', "error");
-        }
-        if (location.length < 3) {
-            return window.toastify('Enter the Location and location word should be 5', "error");
-        }
-        if (description.length < 10) {
-            return window.toastify('Enter the Description and description word should be 10', "error");
-        }
-        if (!file.name) {
-            return window.toastify('Upload', "error");
-        }
+        if (title.length < 3) { return window.toastify('Enter the Title and title word should be 5', "error"); }
+        if (location.length < 3) { return window.toastify('Enter the Location and location word should be 5', "error"); }
+        if (description.length < 10) { return window.toastify('Enter the Description and description word should be 10', "error"); }
+        if (file && file.size > 1000000) { return window.toastify("File size should be less then form 1MB", "error") }
+
         let formData = { title, location, description, }
         formData.createdDate = serverTimestamp()
         formData.id = window.getRandomId()

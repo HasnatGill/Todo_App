@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { MenuOutlined, HomeFilled, LogoutOutlined } from '@ant-design/icons';
+import { MenuOutlined, HomeFilled, LogoutOutlined, LineChartOutlined } from '@ant-design/icons';
 import { Layout, Menu, Typography, Button } from 'antd';
 import { Link, Route, Routes, useNavigate } from 'react-router-dom'
 import Home from './Home'
@@ -7,15 +7,16 @@ import Todolist from './Todolist'
 import { AuthContext } from '../../context/AuthContext';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../config/firebase';
+import AppChart from './AppChart';
 const { Content, Footer, Sider } = Layout;
 const { Title } = Typography;
 
 export default function Frontend() {
 
-    const { dispatch} = useContext(AuthContext)
+    const { dispatch } = useContext(AuthContext)
 
     let navigate = useNavigate()
-   
+
     const handleLogout = () => {
         signOut(auth)
             .then(() => {
@@ -30,7 +31,8 @@ export default function Frontend() {
     const menu = [
         { label: <Link to="/" className='text-decoration-none'>Home</Link>, key: "1", icon: <HomeFilled /> },
         { label: <Link to="/todolist" className='text-decoration-none'>Todo List</Link>, key: "2", icon: <MenuOutlined /> },
-        { label: <Button type='link' className='flex-center px-0' style={{ color: "inherit" }} onClick={handleLogout} ><LogoutOutlined /> Logout</Button>, key: "3" },
+        { label: <Link to="/appchart" className='text-decoration-none'>Chart</Link>, key: "3", icon: <LineChartOutlined /> },
+        { label: <Button type='link' className='flex-center px-0' style={{ color: "inherit" }} onClick={handleLogout} ><LogoutOutlined /> Logout</Button>, key: "4" },
     ]
 
     return (
@@ -45,6 +47,7 @@ export default function Frontend() {
                     <Routes>
                         <Route index element={<Home />} />
                         <Route path='todolist' element={<Todolist />} />
+                        <Route path='appchart' element={<AppChart />} />
                     </Routes>
                 </Content>
 

@@ -13,8 +13,6 @@ import ReactGA from "react-ga4";
 const { Title } = Typography;
 const { Search, TextArea } = Input;
 
-// const initialState = { title: "", location: "", description: "" }
-
 export default function Todolist() {
 
   const { user } = useContext(AuthContext)
@@ -95,6 +93,14 @@ export default function Todolist() {
   };
 
   const handleUpdate = async () => {
+
+    let { title, location, description } = todo;
+ 
+    if (title.length < 3) { return window.toastify('Enter the Title and title word should be 5', "error"); }
+    if (location.length < 3) { return window.toastify('Enter the Location and location word should be 5', "error"); }
+    if (description.length < 10) { return window.toastify('Enter the Description and description word should be 10', "error"); }
+    if (file && file.size > 1000000) { return window.toastify("File size should be less then form 1MB", "error") }
+
     let formData = { ...todo }
     formData.ModifiedDate = serverTimestamp()
     formData.modifiedBy = {
@@ -169,22 +175,31 @@ export default function Todolist() {
   }
 
   const handleDelete = async () => {
-    let DeleteTodo = documents.find((doc) => doc.id === selectedRowKeys[0])
-    setLoading(true)
+
     ReactGA.event({
       category: "Delete",
       action: "Delete_Todo "
     })
-    try {
-      await deleteDoc(doc(firestore, "todos", DeleteTodo.id));
-      let newDocument = documents.filter((doc) => {
-        return doc.id !== DeleteTodo.id
-      })
-      setDocuments(newDocument)
-      setSelectedRowKeys([])
-      setLoading(false)
-    } catch (error) {
-      console.log('error', error)
+
+    for (let items of selectedRowKeys) {
+      let id = { id: items }
+      let DeleteTodo = documents.find((doc) => doc.id === id.id)
+
+      setLoading(true)
+
+      try {
+        await deleteDoc(doc(firestore, "todos", DeleteTodo.id));
+        let newDocument = documents.filter((item) => {
+          return item.id !== DeleteTodo.id
+        });
+
+        console.log('newDocument', newDocument)
+        setSelectedRowKeys([])
+        setDocuments(newDocument)
+        setLoading(false)
+      } catch (error) {
+        console.log('error', error)
+      }
     }
   };
 
@@ -197,7 +212,7 @@ export default function Todolist() {
     onChange: onSelectChange,
   };
 
-  const hasdelete = selectedRowKeys.length === 1;
+  const hasdelete = selectedRowKeys.length > 0;
   // const hasSelected = selectedRowKeys.length > 0;
   const edit = selectedRowKeys.length === 1;
 
