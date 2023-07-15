@@ -7,7 +7,6 @@ import { firestore, storage } from '../../config/firebase';
 import { AuthContext } from '../../context/AuthContext';
 import { useDropzone } from 'react-dropzone';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
-import ReactGA from "react-ga4";
 
 
 const { Title } = Typography;
@@ -83,10 +82,6 @@ export default function Todolist() {
 
 
   const handleEdit = () => {
-    ReactGA.event({
-      category: "Eidt",
-      action: "Edit_Todos"
-    })
     let eidtTodo = documents.find((doc) => doc.id === selectedRowKeys[0])
     setTodo(eidtTodo)
     setOpen(true)
@@ -151,10 +146,6 @@ export default function Todolist() {
 
 
   const updateDocument = async (fromData) => {
-    ReactGA.event({
-      category: "Delete",
-      action: "Delete_Todo "
-    })
     try {
       await setDoc(doc(firestore, "todos", fromData.id), fromData, { merge: true })
       window.toastify("Todo has been successfully Update", "success")
@@ -175,11 +166,6 @@ export default function Todolist() {
   }
 
   const handleDelete = async () => {
-
-    ReactGA.event({
-      category: "Delete",
-      action: "Delete_Todo "
-    })
 
     for (let items of selectedRowKeys) {
       let id = { id: items }

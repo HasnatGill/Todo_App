@@ -31,7 +31,7 @@ export default function Frontend() {
     const menu = [
         { label: <Link to="/" className='text-decoration-none'>Home</Link>, key: "1", icon: <HomeFilled /> },
         { label: <Link to="/todolist" className='text-decoration-none'>Todo List</Link>, key: "2", icon: <MenuOutlined /> },
-        { label: <Link to="/appchart" className='text-decoration-none'>Chart</Link>, key: "3", icon: <LineChartOutlined /> },
+        // { label: <Link to="/appchart" className='text-decoration-none'>Chart</Link>, key: "3", icon: <LineChartOutlined /> },
         { label: <Button type='link' className='flex-center px-0' style={{ color: "inherit" }} onClick={handleLogout} ><LogoutOutlined /> Logout</Button>, key: "4" },
     ]
 

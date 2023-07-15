@@ -6,7 +6,6 @@ import { AuthContext } from '../../context/AuthContext';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore/lite';
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { firestore, storage } from '../../config/firebase';
-import ReactGA from "react-ga4";
 
 const { Title } = Typography
 const { TextArea } = Input
@@ -27,10 +26,6 @@ export default function Home() {
 
     const handleSubmit = () => {
 
-        ReactGA.event({
-            category: 'Submit',
-            action: "Add_Todo",
-        })
 
         let { title, location, description } = state;
         title = title.trim()
